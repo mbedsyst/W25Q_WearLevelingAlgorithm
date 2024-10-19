@@ -1,0 +1,5 @@
+../Src/SPI.c:10:6:SPI2_Init	8	static
+../Src/SPI.c:31:6:SPI2_SelectSlave	4	static
+../Src/SPI.c:37:6:SPI2_DeselectSlave	4	static
+../Src/SPI.c:43:9:SPI2_TransmitReceiveByte	16	static
+../Src/SPI.c:55:6:SPI2_TransmitReceive_MultiByte	32	static

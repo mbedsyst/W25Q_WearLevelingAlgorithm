@@ -1,0 +1,36 @@
+#!/bin/bash
+
+if [ "$#" -ne 1 ]; then
+    echo "Usage: $0 input.mp3"
+    exit 1
+fi
+
+INPUT_FILE="$1"
+WAV_FILE="output.wav"
+PCM_FILE="output.pcm"
+READBACK_FILE="readback.pcm"
+
+echo "Converting MP3 to WAV..."
+ffmpeg -i "$INPUT_FILE" -acodec pcm_s16le -ar 44100 "$WAV_FILE"
+
+echo "Converting WAV to 16-bit PCM..."
+ffmpeg -i "$WAV_FILE" -f s16le -acodec pcm_s16le "$PCM_FILE"
+
+echo "Padding PCM file with zeroes..."
+PCM_SIZE=$(stat --format="%s" "$PCM_FILE")
+PAD_SIZE=$((8388608 - PCM_SIZE))
+dd if=/dev/zero bs=1 count=$PAD_SIZE >> "$PCM_FILE"
+
+echo "Writing padded PCM file to flash..."
+sudo flashrom -p ch341a_spi -w "$PCM_FILE"
+
+echo "Reading back from flash..."
+sudo flashrom -p ch341a_spi -r "$READBACK_FILE"
+echo "Verifying the PCM file..."
+if diff "$PCM_FILE" "$READBACK_FILE"; then
+    echo "Verification successful: The files match!"
+else
+    echo "Verification failed: The files do not match."
+fi
+
+echo "Process completed."

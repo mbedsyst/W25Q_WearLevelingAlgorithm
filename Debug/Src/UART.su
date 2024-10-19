@@ -1,0 +1,6 @@
+../Src/UART.c:9:17:Compute_UART_Baud	16	static
+../Src/UART.c:14:13:UART2_SetBaudRate	16	static
+../Src/UART.c:19:6:UART2_Init	8	static
+../Src/UART.c:38:6:UART2_TxChar	16	static
+../Src/UART.c:46:6:UART2_TxString	16	static
+../Src/UART.c:54:9:UART2_RxChar	4	static

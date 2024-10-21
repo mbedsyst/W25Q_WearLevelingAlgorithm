@@ -27,11 +27,12 @@ WriteData()
 * Update Block map array in Memory*/
 
 
-void SFS_ReadEraseCount(uint32_t *eraseCountArr)
+static void SFS_ReadEraseCount(uint32_t *eraseCountArr)
 {
     uint8_t tempBuffer[256];
 
     W25Q_ReadSecurityRegister(1, 0, tempBuffer, 256);
+
     for (int i = 0; i < 256; i += 4)
     {
         eraseCountArr[i / 4] = (tempBuffer[i] << 24) |
@@ -41,6 +42,7 @@ void SFS_ReadEraseCount(uint32_t *eraseCountArr)
     }
 
     W25Q_ReadSecurityRegister(2, 0, tempBuffer, 256);
+
     for (int i = 0; i < 256; i += 4)
     {
         eraseCountArr[(i / 4) + 64] = (tempBuffer[i] << 24) |
@@ -50,26 +52,24 @@ void SFS_ReadEraseCount(uint32_t *eraseCountArr)
     }
 }
 
-void SFS_ReadBlockMap(uint8_t *blockMapArr)
+static void SFS_ReadBlockMap(uint8_t *blockMapArr)
 {
-	uint8_t tempBuffer[256];
+	uint8_t tempBuffer[128];
 
-    W25Q_ReadSecurityRegister(3, 0, tempBuffer, 256);
-    for (int i = 0; i < 256; i += 4)
+    W25Q_ReadSecurityRegister(3, 0, tempBuffer, 128);
+
+    for (int i = 0; i < 128; i++)
     {
-        blockMapArr[(i / 4) + 64] = (tempBuffer[i] << 24) |
-        							(tempBuffer[i + 1] << 16) |
-                                    (tempBuffer[i + 2] << 8) |
-									(tempBuffer[i + 3]);
+        blockMapArr[i] = tempBuffer[i];
     }
 }
 
-uint32_t SFS_CheckEraseCount(uint32_t *eraseCountArr, uint8_t blockNumber)
+static uint32_t SFS_CheckEraseCount(uint32_t *eraseCountArr, uint8_t blockNumber)
 {
 	return eraseCountArr[blockNumber];
 }
 
-uint8_t SFS_FindLowestEraseCount(uint32_t *eraseCountArr, uint8_t blockNumber)
+static uint8_t SFS_FindLowestEraseCount(uint32_t *eraseCountArr, uint8_t blockNumber)
 {
 	int lowestCount = eraseCountArr[blockNumber];
 	int lowestIndex = blockNumber;
@@ -86,35 +86,61 @@ uint8_t SFS_FindLowestEraseCount(uint32_t *eraseCountArr, uint8_t blockNumber)
 	return lowestIndex;
 }
 
-void SFS_IncrementEraseCount(uint32_t *eraseCountArr, uint8_t blockNumber)
+static void SFS_IncrementEraseCount(uint32_t *eraseCountArr, uint8_t blockNumber)
 {
 	eraseCountArr[blockNumber] += 1;
 }
 
-void SFS_LinkBlockMap(uint8_t *blockMap, uint8_t blockNumber, uint8_t lowestCountBlock)
+static void SFS_LinkBlockMap(uint8_t *blockMap, uint8_t blockNumber, uint8_t lowestCountBlock)
 {
 	blockMap[blockNumber] = lowestCountBlock;
 }
 
-void SFS_UpdateEraseCountInMemory(uint8_t blockNumber, uint32_t eraseCount)
+static void SFS_UpdateEraseCountInMemory(uint8_t blockNumber, uint32_t eraseCount)
 {
-	uint8_t regNumber;
-	uint8_t regOffset;
 	uint8_t countArr[4];
-	regNumber = (blockNumber < 64) ? 1 : 2;
-	regOffset = (blockNumber % 64) * 4;
-	for(i = 0; i < 4; i++)
+
+	uint8_t regNumber = (blockNumber < 64) ? 1 : 2;
+	uint8_t regOffset = (blockNumber % 64) * 4;
+
+	for(int i = 0; i < 4; i++)
 	{
 		countArr[i] = (uint8_t)(eraseCount >> (8*(3-i)));
 	}
+
 	W25Q_WriteSecurityRegister(regNumber, regOffset, countArr, 4);
 }
 
-void SFS_UpdateBlockMapinMemory(uint8_t blockNumber, uint8_t position)
+static void SFS_UpdateBlockMapinMemory(uint8_t blockNumber, uint8_t position)
 {
-	uint8_t regOffset;
-	regOffset = (blockNumber % 64) * 2;
+	uint8_t	regOffset = (blockNumber % 64) * 2;
+
 	W25Q_WriteSecurityRegister(3, regOffset, position, 1);
+}
+
+void SFS_InitFS(void)
+{
+	static int exec = 0;
+
+	if(!exec)
+	{
+		uint8_t dummy_byte = 0xFF;
+		W25Q_WriteSecurityRegister(1, 0, &dummy_byte, 256);
+		W25Q_WriteSecurityRegister(2, 0, &dummy_byte, 256);
+		W25Q_WriteSecurityRegister(3, 0, &dummy_byte, 256);
+		printf("File-system Initialized for first time\n\r");
+		exec = 1;
+	}
+	else
+	{
+		printf("File-system already Initialized\n\r");
+	}
+}
+
+void SFS_ReadFS(uint32_t *eraseCountArr, uint8_t *blockMapArr)
+{
+	SFS_ReadEraseCount(eraseCountArr);
+	SFS_ReadBlockMap(blockMapArr);
 }
 
 void SFS_WriteData(uint32_t *eraseCountArr, uint8_t *blockMap, uint8_t blockNumber, uint8_t *data, uint32_t len)
@@ -122,8 +148,7 @@ void SFS_WriteData(uint32_t *eraseCountArr, uint8_t *blockMap, uint8_t blockNumb
 	uint32_t currentEraseCount = SFS_CheckEraseCount(eraseCountArr, blockNumber);
 	uint8_t lowestCountBlock = SFS_FindLowestEraseCount(eraseCountArr, blockNumber);
 
-	uint16_t page = blockNumber * 65536;
-	uint8_t offset = 0;
+	uint16_t page = lowestCountBlock * 65536;
 
 	W25Q_WriteData(page, 0, len, data);
 

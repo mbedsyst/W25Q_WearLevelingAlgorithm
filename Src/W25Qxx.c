@@ -148,7 +148,7 @@ void W25Q_WriteData(uint32_t startPage, uint16_t offset, uint32_t size, uint8_t 
 
 void W25Q_EraseSector(uint8_t blockNumber, uint8_t sectorNumber)
 {
-	uint32_t memAddress = (blockNumber * 65536) + (sector * 4096);
+	uint32_t memAddress = (blockNumber * 65536) + (sectorNumber * 4096);
 	W25Q_WriteEnable();
 	SPI2_SelectSlave();
 	SPI2_TransmitReceiveByte(ERASE_SECTOR);

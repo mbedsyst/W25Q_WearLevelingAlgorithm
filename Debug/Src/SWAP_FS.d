@@ -1,5 +1,5 @@
-Src/main.o: ../Src/main.c ../Inc/SWAP_FS.h ../Inc/W25Qxx.h ../Inc/SPI.h \
- ..//Headers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h \
+Src/SWAP_FS.o: ../Src/SWAP_FS.c ../Inc/SWAP_FS.h ../Inc/W25Qxx.h \
+ ../Inc/SPI.h ..//Headers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h \
  ..//Headers/CMSIS/Device/ST/STM32F4xx/Include/stm32f401xe.h \
  ..//Headers/CMSIS/Include/core_cm4.h \
  ..//Headers/CMSIS/Include/cmsis_version.h \

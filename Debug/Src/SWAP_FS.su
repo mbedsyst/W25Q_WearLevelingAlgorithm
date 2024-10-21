@@ -1,0 +1,11 @@
+../Src/SWAP_FS.c:30:13:SFS_ReadEraseCount	280	static
+../Src/SWAP_FS.c:55:13:SFS_ReadBlockMap	152	static
+../Src/SWAP_FS.c:67:17:SFS_CheckEraseCount	16	static
+../Src/SWAP_FS.c:72:16:SFS_FindLowestEraseCount	32	static
+../Src/SWAP_FS.c:89:13:SFS_IncrementEraseCount	16	static
+../Src/SWAP_FS.c:94:13:SFS_LinkBlockMap	16	static
+../Src/SWAP_FS.c:99:13:SFS_UpdateEraseCountInMemory	32	static
+../Src/SWAP_FS.c:114:13:SFS_UpdateBlockMapinMemory	24	static
+../Src/SWAP_FS.c:121:6:SFS_InitFS	16	static
+../Src/SWAP_FS.c:140:6:SFS_ReadFS	16	static
+../Src/SWAP_FS.c:146:6:SFS_WriteData	32	static

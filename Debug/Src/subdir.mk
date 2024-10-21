@@ -7,6 +7,7 @@
 C_SRCS += \
 ../Src/LED.c \
 ../Src/SPI.c \
+../Src/SWAP_FS.c \
 ../Src/SYSTICK.c \
 ../Src/UART.c \
 ../Src/W25Qxx.c \
@@ -17,6 +18,7 @@ C_SRCS += \
 OBJS += \
 ./Src/LED.o \
 ./Src/SPI.o \
+./Src/SWAP_FS.o \
 ./Src/SYSTICK.o \
 ./Src/UART.o \
 ./Src/W25Qxx.o \
@@ -27,6 +29,7 @@ OBJS += \
 C_DEPS += \
 ./Src/LED.d \
 ./Src/SPI.d \
+./Src/SWAP_FS.d \
 ./Src/SYSTICK.d \
 ./Src/UART.d \
 ./Src/W25Qxx.d \
@@ -42,7 +45,7 @@ Src/%.o Src/%.su Src/%.cyclo: ../Src/%.c Src/subdir.mk
 clean: clean-Src
 
 clean-Src:
-	-$(RM) ./Src/LED.cyclo ./Src/LED.d ./Src/LED.o ./Src/LED.su ./Src/SPI.cyclo ./Src/SPI.d ./Src/SPI.o ./Src/SPI.su ./Src/SYSTICK.cyclo ./Src/SYSTICK.d ./Src/SYSTICK.o ./Src/SYSTICK.su ./Src/UART.cyclo ./Src/UART.d ./Src/UART.o ./Src/UART.su ./Src/W25Qxx.cyclo ./Src/W25Qxx.d ./Src/W25Qxx.o ./Src/W25Qxx.su ./Src/main.cyclo ./Src/main.d ./Src/main.o ./Src/main.su ./Src/syscalls.cyclo ./Src/syscalls.d ./Src/syscalls.o ./Src/syscalls.su ./Src/sysmem.cyclo ./Src/sysmem.d ./Src/sysmem.o ./Src/sysmem.su
+	-$(RM) ./Src/LED.cyclo ./Src/LED.d ./Src/LED.o ./Src/LED.su ./Src/SPI.cyclo ./Src/SPI.d ./Src/SPI.o ./Src/SPI.su ./Src/SWAP_FS.cyclo ./Src/SWAP_FS.d ./Src/SWAP_FS.o ./Src/SWAP_FS.su ./Src/SYSTICK.cyclo ./Src/SYSTICK.d ./Src/SYSTICK.o ./Src/SYSTICK.su ./Src/UART.cyclo ./Src/UART.d ./Src/UART.o ./Src/UART.su ./Src/W25Qxx.cyclo ./Src/W25Qxx.d ./Src/W25Qxx.o ./Src/W25Qxx.su ./Src/main.cyclo ./Src/main.d ./Src/main.o ./Src/main.su ./Src/syscalls.cyclo ./Src/syscalls.d ./Src/syscalls.o ./Src/syscalls.su ./Src/sysmem.cyclo ./Src/sysmem.d ./Src/sysmem.o ./Src/sysmem.su
 
 .PHONY: clean-Src
 

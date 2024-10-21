@@ -1,5 +1,6 @@
 "./Src/LED.o"
 "./Src/SPI.o"
+"./Src/SWAP_FS.o"
 "./Src/SYSTICK.o"
 "./Src/UART.o"
 "./Src/W25Qxx.o"

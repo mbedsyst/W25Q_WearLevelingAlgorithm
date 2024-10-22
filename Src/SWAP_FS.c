@@ -4,8 +4,8 @@
 Wear Leveling Algorithm
 
 Read_EraseCount
-* Fetch first 64 block's erase count array from Security Register 1
-* Fetch next 64 block's erase count array from Security Register 2
+* Fetch the first 64 blocks erase count array from Security Register 1
+* Fetch the next 64 blocks erase count array from Security Register 2
 
 Read_BlockMap
 * Fetch 128 element array from Security Register 3
@@ -14,14 +14,14 @@ CheckEraseCount
 * Return the erase count of that block
 
 CheckLowestCount
-* Find index of block with lowest erase count
+* Find the index of the block with the lowest erase count
 * Return index of block
 
 WriteData()
-* Check block's erase count
-* Find block with lowest erase count
-* Write to the block with lowest erase count
-* Increment erase count in array
+* Check the block's erase count
+* Find the block with the lowest erase count
+* Write to the block with the lowest erase count
+* Increment erase count in the array
 * Update Block map array
 * Update Erase Count array in Memory
 * Update Block map array in Memory*/
@@ -29,39 +29,34 @@ WriteData()
 
 static void SFS_ReadEraseCount(uint32_t *eraseCountArr)
 {
-    uint8_t tempBuffer[256];
-
-    W25Q_ReadSecurityRegister(1, 0, tempBuffer, 256);
-
-    for (int i = 0; i < 256; i += 4)
-    {
-        eraseCountArr[i / 4] = (tempBuffer[i] << 24) |
-        					   (tempBuffer[i + 1] << 16) |
-							   (tempBuffer[i + 2] << 8) |
-							   (tempBuffer[i + 3]);
-    }
-
-    W25Q_ReadSecurityRegister(2, 0, tempBuffer, 256);
-
-    for (int i = 0; i < 256; i += 4)
-    {
-        eraseCountArr[(i / 4) + 64] = (tempBuffer[i] << 24) |
-        							  (tempBuffer[i + 1] << 16) |
-                                      (tempBuffer[i + 2] << 8) |
-									  (tempBuffer[i + 3]);
-    }
+	uint8_t tempBuffer[256];
+	W25Q_ReadSecurityRegister(1, 0, tempBuffer, 256);
+	for (int i = 0; i < 256; i += 4)
+    	{
+        	eraseCountArr[i / 4] = (tempBuffer[i] << 24) |
+        				(tempBuffer[i + 1] << 16) |
+					(tempBuffer[i + 2] << 8) |
+					(tempBuffer[i + 3]);
+    	}
+	
+	W25Q_ReadSecurityRegister(2, 0, tempBuffer, 256);
+	for (int i = 0; i < 256; i += 4)
+    	{
+       		eraseCountArr[(i / 4) + 64] = (tempBuffer[i] << 24) |
+        				      (tempBuffer[i + 1] << 16) |
+               		                      (tempBuffer[i + 2] << 8) |
+					      (tempBuffer[i + 3]);
+    	}
 }
 
 static void SFS_ReadBlockMap(uint8_t *blockMapArr)
 {
 	uint8_t tempBuffer[128];
-
-    W25Q_ReadSecurityRegister(3, 0, tempBuffer, 128);
-
-    for (int i = 0; i < 128; i++)
-    {
-        blockMapArr[i] = tempBuffer[i];
-    }
+	W25Q_ReadSecurityRegister(3, 0, tempBuffer, 128);
+	for (int i = 0; i < 128; i++)
+    	{
+        	blockMapArr[i] = tempBuffer[i];
+    	}
 }
 
 static uint32_t SFS_CheckEraseCount(uint32_t *eraseCountArr, uint8_t blockNumber)

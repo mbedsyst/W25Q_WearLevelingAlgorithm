@@ -6,6 +6,9 @@
 ../Src/SWAP_FS.c:94:13:SFS_LinkBlockMap	16	static
 ../Src/SWAP_FS.c:99:13:SFS_UpdateEraseCountInMemory	32	static
 ../Src/SWAP_FS.c:114:13:SFS_UpdateBlockMapinMemory	24	static
-../Src/SWAP_FS.c:121:6:SFS_InitFS	16	static
-../Src/SWAP_FS.c:140:6:SFS_ReadFS	16	static
-../Src/SWAP_FS.c:146:6:SFS_WriteData	32	static
+../Src/SWAP_FS.c:122:13:SFS_PrintHorizontalLine	16	static
+../Src/SWAP_FS.c:133:13:SFS_DisplayConsole	40	static
+../Src/SWAP_FS.c:172:13:SFS_UpdateConsole	24	static
+../Src/SWAP_FS.c:183:6:SFS_InitFS	16	static
+../Src/SWAP_FS.c:202:6:SFS_ReadFS	16	static
+../Src/SWAP_FS.c:208:6:SFS_WriteData	40	static

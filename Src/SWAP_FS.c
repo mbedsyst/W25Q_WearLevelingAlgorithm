@@ -24,8 +24,8 @@ WriteData()
 * Increment erase count in array
 * Update Block map array
 * Update Erase Count array in Memory
-* Update Block map array in Memory*/
-
+* Update Block map array in Memory
+*/
 
 static void SFS_ReadEraseCount(uint32_t *eraseCountArr)
 {
@@ -115,7 +115,69 @@ static void SFS_UpdateBlockMapinMemory(uint8_t blockNumber, uint8_t position)
 {
 	uint8_t	regOffset = (blockNumber % 64) * 2;
 
-	W25Q_WriteSecurityRegister(3, regOffset, position, 1);
+	W25Q_WriteSecurityRegister(3, regOffset, &position, 1);
+}
+
+
+static void SFS_PrintHorizontalLine(void)
+{
+    printf("+");
+    for (int i = 0; i < COLUMNS; i++)
+    {
+        printf("--------+");
+    }
+    printf("\n");
+}
+
+
+static void SFS_DisplayConsole(uint32_t *eraseCountArr, uint8_t *blockMap)
+{
+	// Set color to Yellow
+    printf("\033[33m");
+    printf("Erase Count Array:\n");
+
+    // Print the grid with horizontal and vertical lines
+    SFS_PrintHorizontalLine();
+    for (int i = 0; i < ROWS; i++)
+    {
+        printf("|");
+        for (int j = 0; j < COLUMNS; j++)
+        {
+            int index = i * COLUMNS + j;
+            printf(" %6lu |", eraseCountArr[index]);
+        }
+        printf("\n");
+        SFS_PrintHorizontalLine();
+    }
+
+    // Set color to white
+    printf("\033[37m");
+    printf("Block Map Array:\n");
+
+    SFS_PrintHorizontalLine();
+    for (int i = 0; i < ROWS; i++)
+    {
+        printf("|");
+        for (int j = 0; j < COLUMNS; j++)
+        {
+            int index = i * COLUMNS + j;
+            printf(" %6d |", blockMap[index]);
+        }
+        printf("\n");
+        SFS_PrintHorizontalLine();
+    }
+    printf("\033[0m");
+}
+
+static void SFS_UpdateConsole(uint32_t *eraseCountArr, uint8_t *blockMap)
+{
+    // Move cursor up enough lines to overwrite both arrays (ROWS * 2 + headers + gridlines)
+    for (int i = 0; i < (ROWS + 1) * 2 + 4; i++)
+    {
+        printf("\033[A");  // Move cursor up one line
+    }
+    // Re-display the arrays with updated values
+    SFS_DisplayConsole(eraseCountArr, blockMap);
 }
 
 void SFS_InitFS(void)
@@ -148,6 +210,11 @@ void SFS_WriteData(uint32_t *eraseCountArr, uint8_t *blockMap, uint8_t blockNumb
 	uint32_t currentEraseCount = SFS_CheckEraseCount(eraseCountArr, blockNumber);
 	uint8_t lowestCountBlock = SFS_FindLowestEraseCount(eraseCountArr, blockNumber);
 
+	if(eraseCountArr[lowestCountBlock] < currentEraseCount)
+	{
+		lowestCountBlock = blockNumber;
+	}
+
 	uint16_t page = lowestCountBlock * 65536;
 
 	W25Q_WriteData(page, 0, len, data);
@@ -157,4 +224,6 @@ void SFS_WriteData(uint32_t *eraseCountArr, uint8_t *blockMap, uint8_t blockNumb
 
 	SFS_UpdateEraseCountInMemory(blockNumber, eraseCountArr[lowestCountBlock]+1);
 	SFS_UpdateBlockMapinMemory(blockNumber, lowestCountBlock);
+
+	SFS_UpdateConsole(eraseCountArr, blockMap);
 }

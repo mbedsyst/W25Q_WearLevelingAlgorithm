@@ -54,8 +54,8 @@ uint8_t W25Q_ReadStatusRegister2(void);
 void W25Q_WriteStatusRegister(uint8_t statusReg1, uint8_t statusReg2);
 
 // Security Register Functions
-void W25Q_WriteSecurityRegister(uint8_t securityReg, uint8_t offset, uint8_t *data, uint8_t len);
-void W25Q_ReadSecurityRegister(uint8_t securityReg, uint8_t offset, uint8_t *data, uint8_t len);
+void W25Q_WriteSecurityRegister(uint8_t securityReg, uint8_t offset, uint8_t *data, uint16_t len);
+void W25Q_ReadSecurityRegister(uint8_t securityReg, uint8_t offset, uint8_t *data, uint16_t len);
 void W25Q_EraseSecurityRegister(uint8_t securityReg);
 
 // Read Functions

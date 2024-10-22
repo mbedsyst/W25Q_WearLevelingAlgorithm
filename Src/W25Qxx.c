@@ -223,7 +223,7 @@ void W25Q_WriteStatusRegister(uint8_t statusReg1, uint8_t statusReg2)
 	SPI2_TransmitReceiveByte(statusReg2);
 	SPI2_DeselectSlave();
 }
-void W25Q_WriteSecurityRegister(uint8_t reg, uint8_t offset, uint8_t *data, uint8_t len)
+void W25Q_WriteSecurityRegister(uint8_t reg, uint8_t offset, uint8_t *data, uint16_t len)
 {
 	uint32_t memAddress;
 
@@ -251,7 +251,7 @@ void W25Q_WriteSecurityRegister(uint8_t reg, uint8_t offset, uint8_t *data, uint
 	SPI2_DeselectSlave();
 }
 
-void W25Q_ReadSecurityRegister(uint8_t reg, uint8_t offset, uint8_t *data, uint8_t len)
+void W25Q_ReadSecurityRegister(uint8_t reg, uint8_t offset, uint8_t *data, uint16_t len)
 {
 	uint32_t memAddress;
 

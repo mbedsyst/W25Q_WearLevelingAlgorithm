@@ -178,7 +178,6 @@ static void SFS_UpdateConsole(uint32_t *eraseCountArr, uint8_t *blockMap)
 void SFS_InitFS(void)
 {
 	static int exec = 0;
-
 	if(!exec)
 	{
 		uint8_t dummy_byte = 0xFF;
@@ -194,11 +193,13 @@ void SFS_InitFS(void)
 	}
 }
 
+
 void SFS_ReadFS(uint32_t *eraseCountArr, uint8_t *blockMapArr)
 {
 	SFS_ReadEraseCount(eraseCountArr);
 	SFS_ReadBlockMap(blockMapArr);
 }
+
 
 void SFS_WriteData(uint32_t *eraseCountArr, uint8_t *blockMap, uint8_t blockNumber, uint8_t *data, uint32_t len)
 {

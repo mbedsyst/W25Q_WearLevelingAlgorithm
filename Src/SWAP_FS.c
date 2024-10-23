@@ -30,22 +30,23 @@ WriteData()
 static void SFS_ReadEraseCount(uint32_t *eraseCountArr)
 {
 	uint8_t tempBuffer[256];
+
 	W25Q_ReadSecurityRegister(1, 0, tempBuffer, 256);
 	for (int i = 0; i < 256; i += 4)
     	{
         	eraseCountArr[i / 4] = (tempBuffer[i] << 24) |
-        				(tempBuffer[i + 1] << 16) |
-					(tempBuffer[i + 2] << 8) |
-					(tempBuffer[i + 3]);
+        						   (tempBuffer[i + 1] << 16) |
+								   (tempBuffer[i + 2] << 8) |
+								   (tempBuffer[i + 3]);
     	}
 	
 	W25Q_ReadSecurityRegister(2, 0, tempBuffer, 256);
 	for (int i = 0; i < 256; i += 4)
     	{
        		eraseCountArr[(i / 4) + 64] = (tempBuffer[i] << 24) |
-        				      (tempBuffer[i + 1] << 16) |
+        				      	  	  	  (tempBuffer[i + 1] << 16) |
                		                      (tempBuffer[i + 2] << 8) |
-					      (tempBuffer[i + 3]);
+										  (tempBuffer[i + 3]);
     	}
 }
 
@@ -54,9 +55,9 @@ static void SFS_ReadBlockMap(uint8_t *blockMapArr)
 	uint8_t tempBuffer[128];
 	W25Q_ReadSecurityRegister(3, 0, tempBuffer, 128);
 	for (int i = 0; i < 128; i++)
-    	{
-        	blockMapArr[i] = tempBuffer[i];
-    	}
+	{
+		blockMapArr[i] = tempBuffer[i];
+	}
 }
 
 static uint32_t SFS_CheckEraseCount(uint32_t *eraseCountArr, uint8_t blockNumber)
@@ -181,10 +182,9 @@ void SFS_InitFS(void)
 
 	if(!exec)
 	{
-		uint8_t dummy_byte = 0xFF;
-		W25Q_WriteSecurityRegister(1, 0, &dummy_byte, 256);
-		W25Q_WriteSecurityRegister(2, 0, &dummy_byte, 256);
-		W25Q_WriteSecurityRegister(3, 0, &dummy_byte, 256);
+		W25Q_EraseSecurityRegister(1);
+		W25Q_EraseSecurityRegister(2);
+		W25Q_EraseSecurityRegister(3);
 		printf("File-system Initialized for first time\n\r");
 		exec = 1;
 	}
@@ -198,6 +198,7 @@ void SFS_ReadFS(uint32_t *eraseCountArr, uint8_t *blockMapArr)
 {
 	SFS_ReadEraseCount(eraseCountArr);
 	SFS_ReadBlockMap(blockMapArr);
+	SFS_UpdateConsole(eraseCountArr, blockMapArr);
 }
 
 void SFS_WriteData(uint32_t *eraseCountArr, uint8_t *blockMap, uint8_t blockNumber, uint8_t *data, uint32_t len)

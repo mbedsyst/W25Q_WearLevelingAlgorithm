@@ -1,32 +1,12 @@
 #include "SWAP_FS.h"
 
-/*
-Wear Leveling Algorithm
-
-Read_EraseCount
-* Fetch the first 64 blocks erase count array from Security Register 1
-* Fetch the next 64 blocks erase count array from Security Register 2
-
-Read_BlockMap
-* Fetch 128 element array from Security Register 3
-
-CheckEraseCount
-* Return the erase count of that block
-
-CheckLowestCount
-* Find the index of the block with the lowest erase count
-* Return index of block
-
-WriteData()
-* Check the block's erase count
-* Find the block with the lowest erase count
-* Write to the block with the lowest erase count
-* Increment erase count in the array
-* Update Block map array
-* Update Erase Count array in Memory
-* Update Block map array in Memory
-*/
-
+/**
+ * @brief Read Erase Count array from Security Register to retrieve
+ * 		  the number of times each block in the storage device has
+ * 		  been erased and stores the values in the provided array.
+ * @param	eraseCountArr	Pointer to 32-bit integer array to store
+ * 							the Erase Count values
+ */
 static void SFS_ReadEraseCount(uint32_t *eraseCountArr)
 {
 	uint8_t tempBuffer[256];
@@ -50,6 +30,12 @@ static void SFS_ReadEraseCount(uint32_t *eraseCountArr)
     	}
 }
 
+/**
+ * @brief Read Block Map array from Security Register to retrieve
+ * 		  the Logical-to-Physical mapping of the memory blocks
+ * @param blockMapArr	Pointer to 8-bit integer array to store
+ * 						the Block Map values
+ */
 static void SFS_ReadBlockMap(uint8_t *blockMapArr)
 {
 	uint8_t tempBuffer[128];
@@ -60,11 +46,23 @@ static void SFS_ReadBlockMap(uint8_t *blockMapArr)
 	}
 }
 
+/**
+ * @brief Returns the Erase Count of the particular block
+ * @param 	eraseCountArr 	Pointer to 32-bit Erase Count Array
+ * @param 	blockNumber 	Memory Block Number
+ * @return 	Erase count of the particular Block
+ */
 static uint32_t SFS_CheckEraseCount(uint32_t *eraseCountArr, uint8_t blockNumber)
 {
 	return eraseCountArr[blockNumber];
 }
 
+/**
+ * @brief Find block with lowest erase count
+ * @param	eraseCountArr 	Pointer to 32-bit Erase Count Array
+ * @param	blockNumber 	Memory Block Number
+ * @return 	Index of block with Lowest Erase Count
+ */
 static uint8_t SFS_FindLowestEraseCount(uint32_t *eraseCountArr, uint8_t blockNumber)
 {
 	int lowestCount = eraseCountArr[blockNumber];
@@ -82,16 +80,33 @@ static uint8_t SFS_FindLowestEraseCount(uint32_t *eraseCountArr, uint8_t blockNu
 	return lowestIndex;
 }
 
+/**
+ * @brief Increment Erase Count in the working copy array
+ * @param	eraseCountArr 	Pointer to 32-bit Erase Count Array
+ * @param	blockNumber 	Memory Block Number
+ */
 static void SFS_IncrementEraseCount(uint32_t *eraseCountArr, uint8_t blockNumber)
 {
 	eraseCountArr[blockNumber] += 1;
 }
 
+/**
+ * @brief Remap Physical block number to Logical Block Number
+ * 		  in the working copy array
+ * @param 	eraseCountArr 		Pointer to 32-bit Erase Count Array
+ * @param 	blockNumber 		Memory Block Number
+ * @param	lowestCountBlock	Block Number with lowest erase count
+ */
 static void SFS_LinkBlockMap(uint8_t *blockMap, uint8_t blockNumber, uint8_t lowestCountBlock)
 {
 	blockMap[blockNumber] = lowestCountBlock;
 }
 
+/**
+ * @brief 	Updates Erase Count in Flash Memories Security Register
+ * @param	blockNumber		Memory Block Number
+ * @param	eraseCount		Erase Count of the block
+ */
 static void SFS_UpdateEraseCountInMemory(uint8_t blockNumber, uint32_t eraseCount)
 {
 	uint8_t countArr[4];
@@ -107,6 +122,12 @@ static void SFS_UpdateEraseCountInMemory(uint8_t blockNumber, uint32_t eraseCoun
 	W25Q_WriteSecurityRegister(regNumber, regOffset, countArr, 4);
 }
 
+/**
+ * @brief	Updates Block Map in Flash Memories Security Register
+ * @param	blockNumber		Logical Memory Block Number
+ * @param	position		Physical Memory Block Number
+
+ */
 static void SFS_UpdateBlockMapinMemory(uint8_t blockNumber, uint8_t position)
 {
 	uint8_t	regOffset = (blockNumber % 64) * 2;
@@ -114,7 +135,9 @@ static void SFS_UpdateBlockMapinMemory(uint8_t blockNumber, uint8_t position)
 	W25Q_WriteSecurityRegister(3, regOffset, &position, 1);
 }
 
-
+/**
+ * @brief Print horizontal line to separate values in console
+ */
 static void SFS_PrintHorizontalLine(void)
 {
     printf("+");
@@ -125,7 +148,11 @@ static void SFS_PrintHorizontalLine(void)
     printf("\n");
 }
 
-
+/**
+ * @brief 	Prints Erase Count and Block Map in Console in grid
+ * @param	eraseCountArr	Pointer to Erase Count array
+ * @param 	blockMap 		Pointer to Block Map array
+ */
 static void SFS_DisplayConsole(uint32_t *eraseCountArr, uint8_t *blockMap)
 {
 	// Set color to Yellow
@@ -165,6 +192,11 @@ static void SFS_DisplayConsole(uint32_t *eraseCountArr, uint8_t *blockMap)
     printf("\033[0m");
 }
 
+/**
+ * @brief	Moves up cursor to Top of screen and Updates values
+ * @param	eraseCountArr	Pointer to Erase Count array
+ * @param 	blockMap 		Pointer to Block Map array
+ */
 static void SFS_UpdateConsole(uint32_t *eraseCountArr, uint8_t *blockMap)
 {
     // Move cursor up enough lines to overwrite both arrays (ROWS * 2 + headers + gridlines)
@@ -176,6 +208,10 @@ static void SFS_UpdateConsole(uint32_t *eraseCountArr, uint8_t *blockMap)
     SFS_DisplayConsole(eraseCountArr, blockMap);
 }
 
+/**
+ * @brief 	Initialize the file system by erasing the Erase Count array
+ * 			Block Map array in Security Register
+ */
 void SFS_InitFS(void)
 {
 	static int exec = 0;
@@ -193,7 +229,13 @@ void SFS_InitFS(void)
 	}
 }
 
-
+/**
+ * @brief 	Reads the Erase Count and Block Map array from
+ * 			Security Registers and creates a working copy
+ * 			of Meta-data in the memory
+ * @param	eraseCountArr	Pointer to Erase Count array
+ * @param 	blockMap 		Pointer to Block Map array
+ */
 void SFS_ReadFS(uint32_t *eraseCountArr, uint8_t *blockMapArr)
 {
 	SFS_ReadEraseCount(eraseCountArr);
@@ -201,7 +243,14 @@ void SFS_ReadFS(uint32_t *eraseCountArr, uint8_t *blockMapArr)
 	SFS_UpdateConsole(eraseCountArr, blockMapArr);
 }
 
-
+/**
+ * @brief 	Write application data to Flash Memory
+ * @param 	eraseCountArr	Pointer to Erase Count Array
+ * @param	blockMap		Pointer to Block Map Array
+ * @param	blockNumber		Logical Memory block Number
+ * @param	data			Pointer to application data
+ * @param	len				Length of application data to be written
+ */
 void SFS_WriteData(uint32_t *eraseCountArr, uint8_t *blockMap, uint8_t blockNumber, uint8_t *data, uint32_t len)
 {
 	uint32_t currentEraseCount = SFS_CheckEraseCount(eraseCountArr, blockNumber);
@@ -212,7 +261,7 @@ void SFS_WriteData(uint32_t *eraseCountArr, uint8_t *blockMap, uint8_t blockNumb
 		lowestCountBlock = blockNumber;
 	}
 
-	uint16_t page = lowestCountBlock * 65536;
+	uint32_t page = lowestCountBlock * 65536;
 
 	W25Q_WriteData(page, 0, len, data);
 
